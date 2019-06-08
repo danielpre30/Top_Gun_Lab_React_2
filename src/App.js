@@ -1,65 +1,98 @@
-import React from 'react';
-import './App.css';
+import React from "react";
+import "./App.css";
 import ColorCard from "./components/ColorCard";
+import { COLORS } from "./mocked-data/colors";
 
-const App = () => (
-  <div className="App">
-    <h1 className="color-cards__title">COLOR CARDS</h1>
-    <main className="color-cards-container">
-      <ColorCard
-        name="Blue"
-        isLight={false}
-        lightClass="color-blue--light"
-        darkClass="color-blue"
-      />
-      <ColorCard
-        name="Yellow"
-        isLight={false}
-        lightClass="color-yellow--light"
-        darkClass="color-yellow"
-      />
-      <ColorCard
-        name="Capri"
-        isLight={false}
-        lightClass="color-Capri--light"
-        darkClass="color-Capri"
-      />
-    </main>
-  </div>
-);
-
-export default App;
+// const App = () => (
+//   <div className="App">
+//     <h1 className="color-cards__title">COLOR CARDS</h1>
+//     <main className="color-cards-container">
+//       <ColorCard
+//         name="Blue"
+//         isLight={false}
+//         lightClass="color-blue--light"
+//         darkClass="color-blue"
+//       />
+//       <ColorCard
+//         name="Yellow"
+//         isLight={false}
+//         lightClass="color-yellow--light"
+//         darkClass="color-yellow"
+//       />
+//       <ColorCard
+//         name="Capri"
+//         isLight={false}
+//         lightClass="color-Capri--light"
+//         darkClass="color-Capri"
+//       />
+//     </main>
+//   </div>
+// );
 
 ///---------------------------------------------------------------------------------
 
 // 1. Conviente el componente App a un componente de Clase.
 // Recuerda importar "Component" de react.
 
-// 2. Inicializa el estado del componente app. Este será un objeto con una llave "colors", que tendrá como valor un arreglo con 3 colores. el arreglo es el siguiente
-
-const colorArray = [
-  {
-    id: 1,
-    name: "blue",
-    isLight: false,
-    darkClass: "color-blue",
-    lightClass: "color-blue--light"
-  },
-  {
-    id: 2,
-    name: "Yellow",
-    isLight: false,
-    darkClass: "color-yellow",
-    lightClass: "color-yellow--light"
-  },
-  {
-    id: 3,
-    name: "Capri",
-    isLight: true,
-    darkClass: "color-Capri",
-    lightClass: "color-Capri--light"
+class App extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      colors: COLORS
+    };
   }
-];
+
+  changeTone(id) {
+    this.setState(prevState => {
+      const { colors } = prevState;
+      let clickedColor = colors.find(color => color.id === id);
+      clickedColor = { ...clickedColor, isLight: !clickedColor.isLight }; //Actualiza el color
+      return {
+        colors: colors.map(color => {
+          if (color.id === id) {
+            return clickedColor;
+          }
+          return color;
+        })
+      };
+    });
+  }
+
+  deleteColor(e, id) {
+    e.stopPropagation();
+    this.setState(prevState => {
+      const { colors } = prevState;
+      return {
+        colors: colors.filter(color => color.id !== id)
+      };
+    });
+  }
+
+  render() {
+    const { colors } = this.state;
+    var cards = colors.map(({ name, isLight, lightClass, darkClass, id }) => {
+      return (
+        <ColorCard
+          name={name}
+          isLight={isLight}
+          lightClass={lightClass}
+          darkClass={darkClass}
+          key={id}
+          changeTone={() => this.changeTone(id)}
+          deleteColor={(e) => this.deleteColor(e, id)}
+        />
+      );
+    });
+    return (
+      <div className="App">
+        <h1 className="color-cards__title">COLOR CARDS</h1>
+        <main className="color-cards-container">{cards}</main>
+      </div>
+    );
+  }
+}
+
+// 2. Inicializa el estado del componente app. Este será un objeto con una llave "colors", que tendrá como valor un arreglo con 3 colores. el arreglo es el siguiente
 
 // 3. Elimina los 3 componentes "ColorCard" que están quemados y utiliza map()
 // para iterar sobre el arreglo de colores del estado.
@@ -87,3 +120,5 @@ const colorArray = [
 // 7. importa la constante "COLORS" (Un arreglo de 15 colores) que está en
 // "./mocked-data/colors". Y remplaza el estado inicial de la aplicación
 // por este arreglo. 🌈 It's Magic! 🌈
+
+export default App;
