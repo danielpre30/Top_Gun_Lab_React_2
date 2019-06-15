@@ -10,7 +10,9 @@ class App extends Component {
     nameText: "",
     lightClassText: "",
     darkClassText: "",
-    isLight: false
+    isLight: false,
+    showWarningMessage: false,
+    windowWidth: window.innerWidth
   }
 
   handleTextChange = (e, keyText) => {
@@ -39,7 +41,7 @@ class App extends Component {
       darkClass,
       lightClass
     }
-    
+
     this.setState(prevState => ({
       colors: prevState.colors.concat(newColor),
       nameText: "",
@@ -47,7 +49,7 @@ class App extends Component {
       darkClassText: "",
       isLight: false
     }))
-  } 
+  }
 
   changeTone = (id) => {
     this.setState((prevState) => {
@@ -57,8 +59,8 @@ class App extends Component {
           const isSelectedColor = color.id === id;
           return (
             isSelectedColor
-            ? { ...color, isLight: !color.isLight }
-            : color
+              ? { ...color, isLight: !color.isLight }
+              : color
           );
         })
       })
@@ -70,9 +72,34 @@ class App extends Component {
     this.setState((prevState) => {
       const oldColors = prevState.colors;
       return ({
-        colors: oldColors.filter(color => color.id !== id)
+        colors: oldColors.filter(color => color.id !== id),
+        showWarningMessage: true
       })
     })
+  }
+
+  componentDidUpdate = (prevProps, prevState) => {
+    const prevlength = prevState.colors.length;
+    const currentLength = this.state.colors.length;
+    const { showWarningMessage } = this.state;
+
+    if (prevlength === currentLength && showWarningMessage) {
+      this.setState({ showWarningMessage: false });
+    }
+  }
+
+  componentDidMount = () => {
+    window.addEventListener('resize', this.updateWidth);
+  }
+
+  componentWillUnmount = () => {
+    window.removeEventListener('resize', this.updateWidth);
+  }
+
+  updateWidth = () => {
+    this.setState({
+      windowWidth: window.innerWidth
+    });
   }
 
   render() {
@@ -82,14 +109,16 @@ class App extends Component {
       nameText,
       lightClassText,
       darkClassText,
-      isLight
+      isLight,
+      showWarningMessage,
+      windowWidth
     } = this.state;
 
     const filteredColors = colors.filter(color => color.name.includes(filterText));
 
     return (
       <div className="App">
-        <h2 className="window-width"><span>width:</span> px</h2>
+        <h2 className="window-width"><span>width:</span>{windowWidth} px</h2>
         <h1 className="color-cards__title">COLOR CARDS</h1>
         <div className="filter-container">
           <input
@@ -110,10 +139,10 @@ class App extends Component {
             />
           ))}
         </main>
-        <h3 className="warning-msg">
+        {showWarningMessage && (<h3 className="warning-msg">
           Hey Hey! Watch out
           <span role="img" aria-label="angry-face">😠</span>
-        </h3>
+        </h3>)}
         <h2 className="create-color-title">Create a color!</h2>
         <form className="create-color-form" onSubmit={this.createColor}>
           <input
